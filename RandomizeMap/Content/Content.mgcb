@@ -68,3 +68,9 @@
 /processorParam:TextureFormat=Color
 /build:50x50start.png
 
+#begin Template.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:TextureFormat=Compressed
+/build:Template.spritefont
+

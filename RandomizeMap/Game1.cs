@@ -12,12 +12,15 @@ namespace RandomizeMap
 
         //Art assests
         Texture2D lava, floor, exit, playerStart, player;
+        SpriteFont font;
 
         //Random map elements
         public int[,] mapGenerator;
         
         //Position based
         Vector2 playerPosition;
+        int xP = 0;
+        int yP = 0;
 
         public Game1() : base()
         {
@@ -30,6 +33,7 @@ namespace RandomizeMap
         protected override void Initialize()
         {
             GenerateMap();
+            PlacePlayer();
 
             base.Initialize();
         }
@@ -43,6 +47,7 @@ namespace RandomizeMap
             player = Content.Load<Texture2D>("50x50player");
             exit = Content.Load<Texture2D>("50x50exit");
             playerStart = Content.Load<Texture2D>("50x50start");
+            font = Content.Load<SpriteFont>("Template");
         }
         protected override void UnloadContent()
         {
@@ -59,7 +64,7 @@ namespace RandomizeMap
         }
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
              _spriteBatch.Begin();
 
@@ -71,9 +76,15 @@ namespace RandomizeMap
         }
         public void Draw()
         {
-           //_spriteBatch.Draw(floor, new Vector2(150, 50), Color.White);  //repalce with GenerateMap()
             DrawMap();
-            _spriteBatch.Draw(player, new Vector2(150, 50), Color.White);   
+            _spriteBatch.Draw(player, new Vector2(playerPosition.X, playerPosition.Y), Color.White);
+            DebugHUD();
+        }
+        public void DebugHUD()
+        {
+            _spriteBatch.DrawString(font, "x: " + playerPosition.X, new Vector2(10, 10), Color.White);
+            _spriteBatch.DrawString(font, "y: " + playerPosition.Y, new Vector2(10, 40), Color.White);
+            _spriteBatch.DrawString(font, "["+(xP+1)+","+(yP+1)+"]: " + mapGenerator[xP, yP], new Vector2(10, 550), Color.White);
         }
         public void DrawMap()
         {   
@@ -99,6 +110,35 @@ namespace RandomizeMap
             tilePositionX += 50;
             x++;
             }
+        }
+        public void PlacePlayer()
+        {
+            do
+            {
+                //Place player checking for lava before placement
+                Random _r = new Random();
+                do
+                {
+                    xP = _r.Next(0, 9);
+                    yP = _r.Next(0, 9);
+                }
+                while (mapGenerator[xP, yP] != 1);
+
+                //Assign to grid pixels
+                if (xP == 0)
+                {
+                    xP = 3;
+                }
+                if (yP == 0)
+                {
+                    yP = 1;
+                }
+                playerPosition.X = xP * 50;
+                playerPosition.X += 150;
+                playerPosition.Y = yP * 50;
+                playerPosition.Y += 50;
+            }
+            while (playerPosition.X <= 149 || playerPosition.X >= 651 && playerPosition.Y <= 49 || playerPosition.Y >= 551);
         }
         public void GenerateMap()
         {
