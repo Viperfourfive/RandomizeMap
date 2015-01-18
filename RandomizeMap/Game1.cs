@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Threading;
 
 namespace RandomizeMap
 {
@@ -18,9 +19,13 @@ namespace RandomizeMap
         public int[,] mapGenerator;
         
         //Position based
+        Input _input = new Input();
+        Vector2 boardStart;
+        Rectangle boardSize;
         Vector2 playerPosition;
         int xP = 0;
         int yP = 0;
+        int startTile, exitTile;
 
         public Game1() : base()
         {
@@ -33,7 +38,13 @@ namespace RandomizeMap
         protected override void Initialize()
         {
             GenerateMap();
-            PlacePlayer();
+            boardStart = new Vector2(150, 50);
+            boardSize = new Rectangle((int)boardStart.X, (int)boardStart.Y, 500, 500);
+
+            PlaceStart();
+            playerPosition = new Vector2(startTile, 50);
+            PlaceExit();
+        
 
             base.Initialize();
         }
@@ -58,7 +69,8 @@ namespace RandomizeMap
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            playerPosition = _input.PlayerMovement(playerPosition, boardSize);
+            
 
             base.Update(gameTime);
         }
@@ -67,9 +79,7 @@ namespace RandomizeMap
             GraphicsDevice.Clear(Color.Black);
 
              _spriteBatch.Begin();
-
             Draw();
-
             _spriteBatch.End();
 
             base.Draw(gameTime);
@@ -77,7 +87,7 @@ namespace RandomizeMap
         public void Draw()
         {
             DrawMap();
-            _spriteBatch.Draw(player, new Vector2(playerPosition.X, playerPosition.Y), Color.White);
+            _spriteBatch.Draw(player, playerPosition, Color.White);
             DebugHUD();
         }
         public void DebugHUD()
@@ -110,39 +120,69 @@ namespace RandomizeMap
             tilePositionX += 50;
             x++;
             }
+
+            //Draw START
+            _spriteBatch.Draw(playerStart, new Vector2(startTile, 50), Color.White);
+            //Draw EXIT
+            _spriteBatch.Draw(exit, new Vector2(exitTile, 500),Color.White);
         }
-        public void PlacePlayer()
+        public int PlaceStart()  //Creates start ALWAYS on top row, but random column.
         {
             do
             {
-                //Place player checking for lava before placement
                 Random _r = new Random();
-                do
-                {
-                    xP = _r.Next(0, 9);
-                    yP = _r.Next(0, 9);
-                }
-                while (mapGenerator[xP, yP] != 1);
-
-                //Assign to grid pixels
-                if (xP == 0)
-                {
-                    xP = 3;
-                }
-                if (yP == 0)
-                {
-                    yP = 1;
-                }
-                playerPosition.X = xP * 50;
-                playerPosition.X += 150;
-                playerPosition.Y = yP * 50;
-                playerPosition.Y += 50;
+                startTile = _r.Next(0, 9);
             }
-            while (playerPosition.X <= 149 || playerPosition.X >= 651 && playerPosition.Y <= 49 || playerPosition.Y >= 551);
+            while (mapGenerator[9, startTile] <= 75);
+
+            return startTile = (startTile * 50) + 150;
         }
-        public void GenerateMap()
+        public int PlaceExit()  //Creates exit ALWAYS on bottom row, but random column.
         {
-            //NOTE array index starts at 0!
+            do
+            {
+                Thread.Sleep(2);
+                Random _r = new Random();
+                exitTile = _r.Next(0, 9);
+            }
+            while(mapGenerator[9,exitTile] <= 75);
+
+            return exitTile = (exitTile * 50) + 150;
+        }
+
+        //  OBSOLETE since adding PlaceExit() && PlaceStart()
+        //public void PlacePlayer() //starting place for the player on launch
+        //{
+        //    do
+        //    {
+        //        //Check for lava before placing the player
+        //        Random _r = new Random();
+        //        do
+        //        {
+        //            xP = _r.Next(0, 9);
+        //            yP = _r.Next(0, 9);
+        //        }
+        //        while (mapGenerator[xP, yP] != 1);
+
+        //        //Assign to grid pixels
+        //        if (xP == 0)
+        //        {
+        //            xP = 3;
+        //        }
+        //        if (yP == 0)
+        //        {
+        //            yP = 1;
+        //        }
+        //        playerPosition.X = xP * 50;
+        //        playerPosition.X += 150;
+        //        playerPosition.Y = yP * 50;
+        //        playerPosition.Y += 50;
+        //    }
+        //    //verify that position is inside game board.
+        //    while (playerPosition.X <= 149 || playerPosition.X >= 651 && playerPosition.Y <= 99 || playerPosition.Y >= 501);
+        //}
+        public int[,] GenerateMap()
+        {
             Random _r = new Random();
             mapGenerator = new int[10, 10];
 
@@ -159,6 +199,7 @@ namespace RandomizeMap
                 }
                 x++;                    
             }
+            return mapGenerator;
         }
     }
 }
