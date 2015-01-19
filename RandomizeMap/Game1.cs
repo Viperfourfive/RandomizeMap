@@ -17,6 +17,7 @@ namespace RandomizeMap
 
         //Random map elements
         public int[,] mapGenerator;
+        Random _r;
         
         //Position based
         Input _input = new Input();
@@ -41,6 +42,7 @@ namespace RandomizeMap
             boardStart = new Vector2(150, 50);
             boardSize = new Rectangle((int)boardStart.X, (int)boardStart.Y, 500, 500);
 
+            _r = new Random();
             PlaceStart();
             playerPosition = new Vector2(startTile, 50);
             PlaceExit();
@@ -120,7 +122,6 @@ namespace RandomizeMap
             tilePositionX += 50;
             x++;
             }
-
             //Draw START
             _spriteBatch.Draw(playerStart, new Vector2(startTile, 50), Color.White);
             //Draw EXIT
@@ -130,7 +131,6 @@ namespace RandomizeMap
         {
             do
             {
-                Random _r = new Random();
                 startTile = _r.Next(0, 9);
             }
             while (mapGenerator[9, startTile] <= 75);
@@ -141,11 +141,9 @@ namespace RandomizeMap
         {
             do
             {
-                Thread.Sleep(2);
-                Random _r = new Random();
                 exitTile = _r.Next(0, 9);
             }
-            while(mapGenerator[9,exitTile] <= 75);
+            while(mapGenerator[9,exitTile] <= 75 && exitTile != startTile);
 
             return exitTile = (exitTile * 50) + 150;
         }
